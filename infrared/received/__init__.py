@@ -34,7 +34,7 @@ class Received(abc.ABC):
     BADADDR = micropython.const(-7)
 
     def __init__(self, pin, nedges, tblock, callback, *args):  # Optional args for callback
-        self._times = array.array('i', (0 for _ in range(nedges + 1)))  # +1 for overrun
+        self._times = array.array('i', [0 for _ in range(nedges + 1)])  # +1 for overrun
         self._pin = pin
         self._nedges = nedges
         self._tblock = tblock
@@ -48,7 +48,7 @@ class Received(abc.ABC):
         self.tim = machine.Timer(-1)  # Sofware timer
         self.cb = self.decode
 
-        pin.irq(handler=self.__cb_pin, trigger=(Pin.IRQ_FALLING | Pin.IRQ_RISING))
+        pin.irq(handler=self.__cb_pin, trigger=(machine.Pin.IRQ_FALLING | machine.Pin.IRQ_RISING))
 
     # Pin interrupt. Save time of each edge for later decode.
     def __cb_pin(self, line) -> None:

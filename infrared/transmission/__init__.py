@@ -61,8 +61,9 @@ class Transmission:
             self._duty = duty
             self._tim = Timer(5)  # Timer 5 controls carrier on/off times
         self._tcb = self._cb  # Pre-allocate
-        self._arr = array.array('H', (0 for _ in range(asize)))  # on/off times (μs)
+        self._arr = array.array('H', [0 for _ in range(asize)])  # on/off times (μs)
         self._mva = memoryview(self._arr)
+
         # Subclass interface
         self.verbose = verbose
         self.carrier = False  # Notional carrier state while encoding biphase
