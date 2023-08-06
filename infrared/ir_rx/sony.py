@@ -7,6 +7,7 @@
 from utime import ticks_us, ticks_diff
 from ir_rx import IR_RX
 
+
 class SONY_ABC(IR_RX):  # Abstract base class
     def __init__(self, pin, bits, callback, *args):
         # 20 bit block has 42 edges and lasts <= 39ms nominal. Add 4ms to time
@@ -56,15 +57,17 @@ class SONY_ABC(IR_RX):  # Abstract base class
             val = 0
         self.do_callback(cmd, addr, val)
 
+
 class SONY_12(SONY_ABC):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, 12, callback, *args)
+
 
 class SONY_15(SONY_ABC):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, 15, callback, *args)
 
+
 class SONY_20(SONY_ABC):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, 20, callback, *args)
-

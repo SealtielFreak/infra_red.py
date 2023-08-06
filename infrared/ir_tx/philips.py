@@ -33,9 +33,11 @@ class RC5(IR):
                     self.append(_T_RC5, _T_RC5)
             mask >>= 1
 
+
 # Philips RC6 mode 0 protocol
 _T_RC6 = const(444)
 _T2_RC6 = const(889)
+
 
 class RC6_M0(IR):
     valid = (0xff, 0xff, 1)  # Max addr, data, toggle

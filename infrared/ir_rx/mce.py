@@ -9,8 +9,10 @@
 from utime import ticks_us, ticks_diff
 from ir_rx import IR_RX
 
+
 class MCE(IR_RX):
     init_cs = 4  # http://www.hifi-remote.com/johnsfine/DecodeIR.html#OrtekMCE says 3
+
     def __init__(self, pin, callback, *args):
         # Block lasts ~19ms and has <= 34 edges
         super().__init__(pin, 34, 25, callback, *args)

@@ -5,6 +5,7 @@
 
 # Copyright (c) 2020-2021 Peter Hinch
 from sys import platform
+
 ESP32 = platform == 'esp32'  # Loboris not supported owing to RMT
 RP2 = platform == 'rp2'
 if ESP32:
@@ -18,12 +19,14 @@ else:
 from micropython import const
 from array import array
 from time import ticks_us, ticks_diff
+
 # import micropython
 # micropython.alloc_emergency_exception_buf(100)
 
 
 # Shared by NEC
 STOP = const(0)  # End of data
+
 
 # IR abstract base class. Array holds periods in μs between toggling 36/38KHz
 # carrier on or off. Physical transmission occurs in an ISR context controlled
@@ -42,7 +45,7 @@ class IR:
 
     def __init__(self, pin, cfreq, asize, duty, verbose):
         if ESP32:
-            self._rmt = RMT(0, pin=pin, clock_div=80, tx_carrier = (cfreq, duty, 1))
+            self._rmt = RMT(0, pin=pin, clock_div=80, tx_carrier=(cfreq, duty, 1))
             # 1μs resolution
         elif RP2:  # PIO-based RMT-like device
             self._rmt = RP2_RMT(pin_pulse=None, carrier=(pin, cfreq, duty))  # 1μs resolution
@@ -57,7 +60,8 @@ class IR:
             self._duty = duty
             self._tim = Timer(5)  # Timer 5 controls carrier on/off times
         self._tcb = self._cb  # Pre-allocate
-        self._arr = array('H', 0 for _ in range(asize))  # on/off times (μs)
+        self._arr = array('H', 0
+        for _ in range(asize))  # on/off times (μs)
         self._mva = memoryview(self._arr)
         # Subclass interface
         self.verbose = verbose
@@ -97,7 +101,7 @@ class IR:
     # Subclass interface
     def trigger(self):  # Used by NEC to initiate a repeat frame
         if ESP32:
-            self._rmt.write_pulses(tuple(self._mva[0 : self.aptr]))
+            self._rmt.write_pulses(tuple(self._mva[0: self.aptr]))
         elif RP2:
             self.append(STOP)
             self._rmt.send(self._arr)

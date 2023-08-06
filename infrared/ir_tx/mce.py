@@ -29,7 +29,7 @@ class MCE(IR):
             return cs
 
         self.append(2000, 1000, _TBIT)
-        d = ((data & 0x3f) << 6) | (addr & 0xf)  | ((toggle & 3) << 4)
+        d = ((data & 0x3f) << 6) | (addr & 0xf) | ((toggle & 3) << 4)
         d |= checksum(d) << 12
         self.verbose and print(bin(d))
 

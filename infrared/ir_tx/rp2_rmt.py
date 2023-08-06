@@ -7,6 +7,7 @@
 from machine import Pin, PWM
 import rp2
 
+
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW, autopull=True, pull_thresh=32)
 def pulsetrain():
     wrap_target()
@@ -14,13 +15,14 @@ def pulsetrain():
     irq(rel(0))
     set(pins, 1)  # Set pin high
     label('loop')
-    jmp(x_dec,'loop')
+    jmp(x_dec, 'loop')
     irq(rel(0))
     set(pins, 0)  # Set pin low
     out(y, 32)  # Low time.
     label('loop_lo')
-    jmp(y_dec,'loop_lo')
+    jmp(y_dec, 'loop_lo')
     wrap()
+
 
 @rp2.asm_pio(autopull=True, pull_thresh=32)
 def irqtrain():
@@ -28,12 +30,14 @@ def irqtrain():
     out(x, 32)  # No of 1MHz ticks. Block if FIFO MT at end.
     irq(rel(0))
     label('loop')
-    jmp(x_dec,'loop')
+    jmp(x_dec, 'loop')
     wrap()
+
 
 class DummyPWM:
     def duty_u16(self, _):
         pass
+
 
 class RP2_RMT:
 
@@ -92,7 +96,7 @@ class RP2_RMT:
         self.icm = x  # index of 1st STOP
         mv = memoryview(ar)
         n = min(x, 4)  # Fill FIFO if there are enough data points.
-        self.sm.put(mv[0 : n])
+        self.sm.put(mv[0: n])
         self.arr = ar  # Initial conditions for ISR
         self.apt = n  # Point to next data value
         self.ict = 0  # IRQ count

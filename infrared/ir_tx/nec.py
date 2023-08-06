@@ -11,6 +11,7 @@ from ir_tx import IR, STOP
 _TBURST = const(563)
 _T_ONE = const(1687)
 
+
 class NEC(IR):
     valid = (0xffff, 0xff, 0)  # Max addr, data, toggle
     samsung = False
@@ -28,9 +29,9 @@ class NEC(IR):
             self.append(9000, 4500)
         if addr < 256:  # Short address: append complement
             if self.samsung:
-              addr |= addr << 8
+                addr |= addr << 8
             else:
-              addr |= ((addr ^ 0xff) << 8)
+                addr |= ((addr ^ 0xff) << 8)
         for _ in range(16):
             self._bit(addr & 1)
             addr >>= 1

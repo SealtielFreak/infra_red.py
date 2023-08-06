@@ -6,6 +6,7 @@
 
 # Implements a 2-button remote control on a Pyboard with auto repeat.
 from sys import platform
+
 ESP32 = platform == 'esp32'
 if ESP32:
     from machine import Pin
@@ -22,6 +23,7 @@ _FIRST = const(0)
 _REP = const(1)
 _END = const(2)
 _REP_DELAY = const(60)
+
 
 class Rbutton:
     def __init__(self, irb, pin, addr, data, rep_code=False):
@@ -52,8 +54,9 @@ class Rbutton:
             self.tim.trigger(_REP_DELAY)
             self.irb.transmit(self.addr, self.data, _REP, True)
 
+
 async def main():
-    pin = Pin(23, Pin.OUT, value = 0) if ESP32 else Pin('X1')
+    pin = Pin(23, Pin.OUT, value=0) if ESP32 else Pin('X1')
     irb = MCE(pin)  # verbose=True)
     # Uncomment the following to print transmit timing
     # irb.timeit = True
@@ -73,6 +76,7 @@ async def main():
             await asyncio.sleep_ms(500)  # Obligatory flashing LED.
             led.toggle()
 
+
 # Greeting strings. Common:
 s = '''Test for IR transmitter. Run:
 from ir_tx.mcetest import test
@@ -90,6 +94,7 @@ Ground pin 18 to send addr 1 data 7
 Ground pin 19 to send addr 0xe data 0x0b.'''
 
 print(''.join((s, sesp)) if ESP32 else ''.join((s, spb)))
+
 
 def test():
     loop.run_until_complete(main())

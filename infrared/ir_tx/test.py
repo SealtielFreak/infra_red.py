@@ -6,6 +6,7 @@
 
 # Implements a 2-button remote control on a Pyboard with auto repeat.
 from sys import platform
+
 ESP32 = platform == 'esp32'
 RP2 = platform == 'rp2'
 PYBOARD = platform == 'pyboard'
@@ -23,10 +24,12 @@ from ir_tx.philips import RC5, RC6_M0
 
 loop = asyncio.get_event_loop()
 
+
 # If button is held down normal behaviour is to retransmit
 # but most NEC models send a REPEAT code
 class Rbutton:
     toggle = 1  # toggle is ignored in NEC mode
+
     def __init__(self, irb, pin, addr, data, proto):
         self.irb = irb
         self.sw = Switch(pin)
@@ -59,12 +62,13 @@ class Rbutton:
                 tog = 0 if self.proto < 3 else Rbutton.toggle  # NEC, sony 12, 15: toggle==0
                 self.irb.transmit(self.addr, self.data, tog, True)  # Test validation
 
+
 async def main(proto):
     # Test uses a 38KHz carrier.
     if ESP32:  # Pins for IR LED gate
-        pin = Pin(23, Pin.OUT, value = 0)
+        pin = Pin(23, Pin.OUT, value=0)
     elif RP2:
-        pin = Pin(17, Pin.OUT, value = 0)
+        pin = Pin(17, Pin.OUT, value=0)
     else:
         pin = Pin('X1')
     classes = (NEC, SONY_12, SONY_15, SONY_20, RC5, RC6_M0)
@@ -91,6 +95,7 @@ async def main(proto):
         while True:
             await asyncio.sleep_ms(500)  # Obligatory flashing LED.
             led.toggle()
+
 
 # Greeting strings. Common:
 s = '''Test for IR transmitter. Run:
@@ -127,6 +132,7 @@ elif RP2:
     print(''.join((s, srp2)))
 else:
     print(''.join((s, spb)))
+
 
 def test(proto=0):
     loop.run_until_complete(main(proto))

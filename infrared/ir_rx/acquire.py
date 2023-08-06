@@ -15,12 +15,13 @@ from ir_rx import IR_RX
 class IR_GET(IR_RX):
     def __init__(self, pin, nedges=100, twait=100, display=True):
         self.display = display
-        super().__init__(pin, nedges, twait, lambda *_ : None)
+        super().__init__(pin, nedges, twait, lambda *_: None)
         self.data = None
 
     def decode(self, _):
         def near(v, target):
             return target * 0.8 < v < target * 1.2
+
         lb = self.edge - 1  # Possible length of burst
         if lb < 3:
             return  # Noise
@@ -46,7 +47,7 @@ class IR_GET(IR_RX):
 
             if not ok and near(burst[0], 2400) and near(burst[1], 600):  # Maybe Sony
                 try:
-                    nbits = {25:12, 31:15, 41:20}[lb]
+                    nbits = {25: 12, 31: 15, 41: 20}[lb]
                 except KeyError:
                     pass
                 else:
@@ -79,7 +80,8 @@ class IR_GET(IR_RX):
                 ok = True
 
             if not ok:
-                print('Unknown protocol start {} {} Burst length {} duration {}'.format(burst[0], burst[1], lb, duration))
+                print(
+                    'Unknown protocol start {} {} Burst length {} duration {}'.format(burst[0], burst[1], lb, duration))
 
             print()
         self.data = burst
@@ -91,6 +93,7 @@ class IR_GET(IR_RX):
             sleep_ms(5)
         self.close()
         return self.data
+
 
 def test():
     # Define pin according to platform

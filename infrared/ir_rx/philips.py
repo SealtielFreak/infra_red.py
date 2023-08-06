@@ -7,6 +7,7 @@
 from utime import ticks_us, ticks_diff
 from ir_rx import IR_RX
 
+
 class RC5_IR(IR_RX):
     def __init__(self, pin, callback, *args):
         # Block lasts <= 30ms and has <= 28 edges
@@ -56,6 +57,7 @@ class RC6_M0(IR_RX):
     # Scope shows 360-520 μs (-84μs +76μs relative to nominal)
     # Header nominal 2666, 889, 444, 889, 444, 444, 444, 444 carrier ON at end
     hdr = ((1800, 4000), (593, 1333), (222, 750), (593, 1333), (222, 750), (222, 750), (222, 750), (222, 750))
+
     def __init__(self, pin, callback, *args):
         # Block lasts 23ms nominal and has <=44 edges
         super().__init__(pin, 44, 30, callback, *args)
@@ -111,8 +113,8 @@ class RC6_M0(IR_RX):
                 x += 1 + int(short)
 
             if self.verbose:
-                 ss = '20-bit format {:020b} x={} nedges={} bits={}'
-                 print(ss.format(v, x, nedges, bits))
+                ss = '20-bit format {:020b} x={} nedges={} bits={}'
+                print(ss.format(v, x, nedges, bits))
 
             val = v & 0xff
             addr = (v >> 8) & 0xff

@@ -29,6 +29,7 @@ elif platform == "esp32" or platform == "esp32_LoBo":
 elif platform == "rp2":
     p = Pin(16, Pin.IN)
 
+
 # User callback
 def cb(data, addr, ctrl):
     if data < 0:  # NEC protocol sends repeat codes.

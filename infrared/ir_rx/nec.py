@@ -10,6 +10,7 @@
 from utime import ticks_us, ticks_diff
 from ir_rx import IR_RX
 
+
 class NEC_ABC(IR_RX):
     def __init__(self, pin, extended, samsung, callback, *args):
         # Block lasts <= 80ms (extended mode) and has 68 edges
@@ -37,7 +38,7 @@ class NEC_ABC(IR_RX):
                     val >>= 1
                     if ticks_diff(self._times[edge + 1], self._times[edge]) > 1120:
                         val |= 0x80000000
-            elif width > 1700: # 2.5ms space for a repeat code. Should have exactly 4 edges.
+            elif width > 1700:  # 2.5ms space for a repeat code. Should have exactly 4 edges.
                 raise RuntimeError(self.REPEAT if self.edge == 4 else self.BADREP)  # Treat REPEAT as error.
             else:
                 raise RuntimeError(self.BADSTART)
@@ -56,13 +57,16 @@ class NEC_ABC(IR_RX):
         # Set up for new data burst and run user callback
         self.do_callback(cmd, addr, 0, self.REPEAT)
 
+
 class NEC_8(NEC_ABC):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, False, False, callback, *args)
 
+
 class NEC_16(NEC_ABC):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, True, False, callback, *args)
+
 
 class SAMSUNG(NEC_ABC):
     def __init__(self, pin, callback, *args):
