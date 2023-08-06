@@ -1,4 +1,4 @@
-# ir_tx.mcetest Test for nonblocking MCE IR blaster.
+# transmission.mcetest Test for nonblocking MCE IR blaster.
 
 # Released under the MIT License (MIT). See LICENSE.
 
@@ -79,7 +79,7 @@ async def main():
 
 # Greeting strings. Common:
 s = '''Test for IR transmitter. Run:
-from ir_tx.mcetest import test
+from transmission.mcetest import test
 test()
 '''
 # Pyboard:

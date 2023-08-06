@@ -1,13 +1,15 @@
 # __init__.py Nonblocking IR blaster
 # Runs on Pyboard D or Pyboard 1.x (not Pyboard Lite), ESP32 and RP2
-
+import abc
 # Released under the MIT License (MIT). See LICENSE.
 
 # Copyright (c) 2020-2021 Peter Hinch
-from sys import platform
+import sys
+import micropython
 
-ESP32 = platform == 'esp32'  # Loboris not supported owing to RMT
-RP2 = platform == 'rp2'
+ESP32 = sys.platform == 'esp32'  # Loboris not supported owing to RMT
+RP2 = sys.platform == 'rp2'
+
 if ESP32:
     from machine import Pin, PWM
     from esp32 import RMT
@@ -16,22 +18,21 @@ elif RP2:
 else:
     from pyb import Pin, Timer  # Pyboard does not support machine.PWM
 
-from micropython import const
-from array import array
-from time import ticks_us, ticks_diff
+import array
+import utime
 
 # import micropython
 # micropython.alloc_emergency_exception_buf(100)
 
 
 # Shared by NEC
-STOP = const(0)  # End of data
+STOP = micropython.const(0)  # End of data
 
 
 # IR abstract base class. Array holds periods in μs between toggling 36/38KHz
 # carrier on or off. Physical transmission occurs in an ISR context controlled
 # by timer 2 and timer 5. See TRANSMITTER.md for details of operation.
-class IR:
+class Transmission:
     _active_high = True  # Hardware turns IRLED on if pin goes high.
     _space = 0  # Duty ratio that causes IRLED to be off
     timeit = False  # Print timing info
@@ -51,7 +52,7 @@ class IR:
             self._rmt = RP2_RMT(pin_pulse=None, carrier=(pin, cfreq, duty))  # 1μs resolution
             asize += 1  # Allow for possible extra space pulse
         else:  # Pyboard
-            if not IR._active_high:
+            if not Transmission._active_high:
                 duty = 100 - duty
             tim = Timer(2, freq=cfreq)  # Timer 2/pin produces 36/38/40KHz carrier
             self._ch = tim.channel(1, Timer.PWM, pin=pin)
@@ -60,13 +61,13 @@ class IR:
             self._duty = duty
             self._tim = Timer(5)  # Timer 5 controls carrier on/off times
         self._tcb = self._cb  # Pre-allocate
-        self._arr = array('H', 0
-        for _ in range(asize))  # on/off times (μs)
+        self._arr = array.array('H', (0 for _ in range(asize)))  # on/off times (μs)
         self._mva = memoryview(self._arr)
         # Subclass interface
         self.verbose = verbose
         self.carrier = False  # Notional carrier state while encoding biphase
         self.aptr = 0  # Index into array
+        self.valid = []
 
     def _cb(self, t):  # T5 callback, generate a carrier mark or space
         t.deinit()
@@ -82,7 +83,7 @@ class IR:
     # Public interface
     # Before populating array, zero pointer, set notional carrier state (off).
     def transmit(self, addr, data, toggle=0, validate=False):  # NEC: toggle is unused
-        t = ticks_us()
+        t = utime.ticks_us()
         if validate:
             if addr > self.valid[0] or addr < 0:
                 raise ValueError('Address out of range', addr)
@@ -95,7 +96,7 @@ class IR:
         self.tx(addr, data, toggle)  # Subclass populates ._arr
         self.trigger()  # Initiate transmission
         if self.timeit:
-            dt = ticks_diff(ticks_us(), t)
+            dt = utime.ticks_diff(utime.ticks_us(), t)
             print('Time = {}μs'.format(dt))
 
     # Subclass interface
@@ -123,14 +124,18 @@ class IR:
         # .carrier unaffected
         self._arr[self.aptr - 1] += t
 
+    @abc.abstractmethod
+    def tx(self, addr, data, toggle) -> None:
+        ...
+
 
 # Given an iterable (e.g. list or tuple) of times, emit it as an IR stream.
-class Player(IR):
-
+class Player(Transmission):
     def __init__(self, pin, freq=38000, verbose=False):  # NEC specifies 38KHz
         super().__init__(pin, freq, 68, 33, verbose)  # Measured duty ratio 33%
 
     def play(self, lst):
+        x = 0
         for x, t in enumerate(lst):
             self._arr[x] = t
         self.aptr = x + 1

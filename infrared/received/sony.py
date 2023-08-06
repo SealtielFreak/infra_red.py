@@ -4,11 +4,13 @@
 # Author: Peter Hinch
 # Copyright Peter Hinch 2020 Released under the MIT license
 
-from utime import ticks_us, ticks_diff
-from ir_rx import IR_RX
+import machine
+import utime
+
+import infrared.received
 
 
-class SONY_ABC(IR_RX):  # Abstract base class
+class ReceivedRemoteSony(infrared.received.Received):  # Abstract base class
     def __init__(self, pin, bits, callback, *args):
         # 20 bit block has 42 edges and lasts <= 39ms nominal. Add 4ms to time
         # for tolerances except in 20 bit case where timing is tight with a
@@ -28,10 +30,10 @@ class SONY_ABC(IR_RX):  # Abstract base class
             if nedges not in (26, 32, 42) or bits > self._bits:
                 raise RuntimeError(self.BADBLOCK)
             self.verbose and print('SIRC {}bit'.format(bits))
-            width = ticks_diff(self._times[1], self._times[0])
+            width = utime.ticks_diff(self._times[1], self._times[0])
             if not 1800 < width < 3000:  # 2.4ms leading mark for all valid data
                 raise RuntimeError(self.BADSTART)
-            width = ticks_diff(self._times[2], self._times[1])
+            width = utime.ticks_diff(self._times[2], self._times[1])
             if not 350 < width < 1000:  # 600μs space
                 raise RuntimeError(self.BADSTART)
 
@@ -39,7 +41,7 @@ class SONY_ABC(IR_RX):  # Abstract base class
             x = 2
             bit = 1
             while x <= nedges - 2:
-                if ticks_diff(self._times[x + 1], self._times[x]) > 900:
+                if utime.ticks_diff(self._times[x + 1], self._times[x]) > 900:
                     val |= bit
                 bit <<= 1
                 x += 2
@@ -58,16 +60,16 @@ class SONY_ABC(IR_RX):  # Abstract base class
         self.do_callback(cmd, addr, val)
 
 
-class SONY_12(SONY_ABC):
+class ReceivedRemoteSony12(ReceivedRemoteSony):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, 12, callback, *args)
 
 
-class SONY_15(SONY_ABC):
+class ReceivedRemoteSony15(ReceivedRemoteSony):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, 15, callback, *args)
 
 
-class SONY_20(SONY_ABC):
+class ReceivedRemoteSony20(ReceivedRemoteSony):
     def __init__(self, pin, callback, *args):
         super().__init__(pin, 20, callback, *args)

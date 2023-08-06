@@ -6,17 +6,17 @@
 
 # Run this to characterise a remote.
 
-from sys import platform
-import time
 import gc
-from machine import Pin, freq
-from ir_rx.print_error import print_error  # Optional print of error codes
+import time
+from sys import platform
 
+from ir_rx.mce import MCE
 # Import all implemented classes
 from ir_rx.nec import NEC_8, NEC_16, SAMSUNG
-from ir_rx.sony import SONY_12, SONY_15, SONY_20
 from ir_rx.philips import RC5_IR, RC6_M0
-from ir_rx.mce import MCE
+from ir_rx.print_error import print_error  # Optional print of error codes
+from ir_rx.sony import SONY_12, SONY_15, SONY_20
+from machine import Pin, freq
 
 # Define pin according to platform
 if platform == "pyboard":
@@ -55,7 +55,7 @@ def test(proto=0):
 
 # **** DISPLAY GREETING ****
 s = """Test for IR receiver. Run:
-from ir_rx.test import test
+from received.test import test
 test() for NEC 8 bit protocol,
 test(1) for NEC 16 bit,
 test(2) for Sony SIRC 12 bit,

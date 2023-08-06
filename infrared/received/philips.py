@@ -4,11 +4,13 @@
 # Author: Peter Hinch
 # Copyright Peter Hinch 2020 Released under the MIT license
 
-from utime import ticks_us, ticks_diff
-from ir_rx import IR_RX
+import machine
+import utime
+
+import infrared.received
 
 
-class RC5_IR(IR_RX):
+class ReceivedRemotePhilips(infrared.received.Received):
     def __init__(self, pin, callback, *args):
         # Block lasts <= 30ms and has <= 28 edges
         super().__init__(pin, 28, 30, callback, *args)
@@ -29,7 +31,7 @@ class RC5_IR(IR_RX):
                     print('Bad block 1 edges', nedges, 'x', x)
                     raise RuntimeError(self.BADBLOCK)
                 # width is 889/1778 nominal
-                width = ticks_diff(self._times[x + 1], self._times[x])
+                width = utime.ticks_diff(self._times[x + 1], self._times[x])
                 if not 500 < width < 2100:
                     self.verbose and print('Bad block 3 Width', width, 'x', x)
                     raise RuntimeError(self.BADBLOCK)
@@ -52,7 +54,7 @@ class RC5_IR(IR_RX):
         self.do_callback(val, addr, ctrl)
 
 
-class RC6_M0(IR_RX):
+class RC6_M0(infrared.received.Received):
     # Even on Pyboard D the 444μs nominal pulses can be recorded as up to 705μs
     # Scope shows 360-520 μs (-84μs +76μs relative to nominal)
     # Header nominal 2666, 889, 444, 889, 444, 444, 444, 444 carrier ON at end
@@ -68,12 +70,12 @@ class RC6_M0(IR_RX):
             if not 22 <= nedges <= 44:
                 raise RuntimeError(self.OVERRUN if nedges > 28 else self.BADSTART)
             for x, lims in enumerate(self.hdr):
-                width = ticks_diff(self._times[x + 1], self._times[x])
+                width = utime.ticks_diff(self._times[x + 1], self._times[x])
                 if not (lims[0] < width < lims[1]):
                     self.verbose and print('Bad start', x, width, lims)
                     raise RuntimeError(self.BADSTART)
             x += 1
-            width = ticks_diff(self._times[x + 1], self._times[x])
+            width = utime.ticks_diff(self._times[x + 1], self._times[x])
             # 2nd bit of last 0 is 444μs (0) or 1333μs (1)
             if not 222 < width < 1555:
                 self.verbose and print('Bad block 1 Width', width, 'x', x)
@@ -83,7 +85,7 @@ class RC6_M0(IR_RX):
             bit = v
             bits = 1  # Bits decoded
             x += 1 + int(short)
-            width = ticks_diff(self._times[x + 1], self._times[x])
+            width = utime.ticks_diff(self._times[x + 1], self._times[x])
             if not 222 < width < 1555:
                 self.verbose and print('Bad block 2 Width', width, 'x', x)
                 raise RuntimeError(self.BADBLOCK)
@@ -100,7 +102,7 @@ class RC6_M0(IR_RX):
                 if x > nedges - 2:
                     raise RuntimeError(self.BADBLOCK)
                 # width is 444/889 nominal
-                width = ticks_diff(self._times[x + 1], self._times[x])
+                width = utime.ticks_diff(self._times[x + 1], self._times[x])
                 if not 222 < width < 1111:
                     self.verbose and print('Bad block 3 Width', width, 'x', x)
                     raise RuntimeError(self.BADBLOCK)

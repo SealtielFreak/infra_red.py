@@ -5,12 +5,12 @@
 # Copyright Peter Hinch 2020 Released under the MIT license
 
 # WARNING: This is experimental and subject to change.
+import machine
 
-from utime import ticks_us, ticks_diff
-from ir_rx import IR_RX
+import infrared.received
 
 
-class MCE(IR_RX):
+class ReceivedRemoteMCE(infrared.received.Received):
     init_cs = 4  # http://www.hifi-remote.com/johnsfine/DecodeIR.html#OrtekMCE says 3
 
     def __init__(self, pin, callback, *args):

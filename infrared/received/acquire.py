@@ -5,14 +5,15 @@
 # Author: Peter Hinch
 # Copyright Peter Hinch 2020 Released under the MIT license
 
-from machine import Pin, freq
-from sys import platform
+import sys
 
-from utime import sleep_ms, ticks_us, ticks_diff
-from ir_rx import IR_RX
+import machine
+import utime
+
+import infrared.received
 
 
-class IR_GET(IR_RX):
+class GenericRemote(infrared.received.Received):
     def __init__(self, pin, nedges=100, twait=100, display=True):
         self.display = display
         super().__init__(pin, nedges, twait, lambda *_: None)
@@ -27,13 +28,13 @@ class IR_GET(IR_RX):
             return  # Noise
         burst = []
         for x in range(lb):
-            dt = ticks_diff(self._times[x + 1], self._times[x])
+            dt = utime.ticks_diff(self._times[x + 1], self._times[x])
             if x > 0 and dt > 10000:  # Reached gap between repeats
                 break
             burst.append(dt)
         lb = len(burst)  # Actual length
         # Duration of pulse train 24892 for RC-5 22205 for RC-6
-        duration = ticks_diff(self._times[lb - 1], self._times[0])
+        duration = utime.ticks_diff(self._times[lb - 1], self._times[0])
 
         if self.display:
             for x, e in enumerate(burst):
@@ -90,22 +91,25 @@ class IR_GET(IR_RX):
 
     def acquire(self):
         while self.data is None:
-            sleep_ms(5)
+            utime.sleep_ms(5)
         self.close()
         return self.data
 
 
 def test():
+    pin = None
+
     # Define pin according to platform
-    if platform == 'pyboard':
-        pin = Pin('X3', Pin.IN)
-    elif platform == 'esp8266':
-        freq(160000000)
-        pin = Pin(13, Pin.IN)
-    elif platform == 'esp32' or platform == 'esp32_LoBo':
-        pin = Pin(23, Pin.IN)
-    elif platform == 'rp2':
-        pin = Pin(16, Pin.IN)
-    irg = IR_GET(pin)
+    if sys.platform == 'pyboard':
+        pin = machine.Pin('X3', machine.Pin.IN)
+    elif sys.platform == 'esp8266':
+        machine.freq(160000000)
+        pin = machine.Pin(13, machine.Pin.IN)
+    elif sys.platform == 'esp32' or sys.platform == 'esp32_LoBo':
+        pin = machine.Pin(23, machine.Pin.IN)
+    elif sys.platform == 'rp2':
+        pin = machine.Pin(16, machine.Pin.IN)
+
+    irg = GenericRemote(pin)
     print('Waiting for IR data...')
     return irg.acquire()

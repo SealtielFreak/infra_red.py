@@ -4,14 +4,14 @@
 # Author: Peter Hinch
 # Copyright Peter Hinch 2020 Released under the MIT license
 
-from micropython import const
-from ir_tx import IR
+import micropython
+import infrared.transmission
 
 # Philips RC5 protocol
-_T_RC5 = const(889)  # Time for pulse of carrier
+_T_RC5 = micropython.const(889)  # Time for pulse of carrier
 
 
-class RC5(IR):
+class TransmissionPhilips(infrared.transmission.Transmission):
     valid = (0x1f, 0x7f, 1)  # Max addr, data, toggle
 
     def __init__(self, pin, freq=36000, verbose=False):
@@ -35,11 +35,11 @@ class RC5(IR):
 
 
 # Philips RC6 mode 0 protocol
-_T_RC6 = const(444)
-_T2_RC6 = const(889)
+_T_RC6 = micropython.const(444)
+_T2_RC6 = micropython.const(889)
 
 
-class RC6_M0(IR):
+class RC6_M0(infrared.transmission.Transmission):
     valid = (0xff, 0xff, 1)  # Max addr, data, toggle
 
     def __init__(self, pin, freq=36000, verbose=False):

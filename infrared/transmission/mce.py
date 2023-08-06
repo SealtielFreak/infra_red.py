@@ -6,13 +6,13 @@
 
 # WARNING: This is experimental and subject to change.
 
-from micropython import const
-from ir_tx import IR
+import micropython
+import infrared.transmission
 
-_TBIT = const(500)  # Time (μs) for pulse of carrier
+_TBIT = micropython.const(500)  # Time (μs) for pulse of carrier
 
 
-class MCE(IR):
+class TransmissionMCE(infrared.transmission.Transmission):
     valid = (0xf, 0x3f, 3)  # Max addr, data, toggle
     init_cs = 4  # http://www.hifi-remote.com/johnsfine/DecodeIR.html#OrtekMCE says 3
 

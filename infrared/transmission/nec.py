@@ -5,14 +5,15 @@
 # Copyright Peter Hinch 2020-2022 Released under the MIT license
 
 # With thanks to J.E. Tannenbaum for information re Samsung protocol
-from micropython import const
-from ir_tx import IR, STOP
 
-_TBURST = const(563)
-_T_ONE = const(1687)
+import micropython
+import infrared.transmission
+
+_TBURST = micropython.const(563)
+_T_ONE = micropython.const(1687)
 
 
-class NEC(IR):
+class TransmissionNEC(infrared.transmission.Transmission):
     valid = (0xffff, 0xff, 0)  # Max addr, data, toggle
     samsung = False
 

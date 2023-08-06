@@ -4,12 +4,11 @@
 # Author: Peter Hinch
 # Copyright Peter Hinch 2020 Released under the MIT license
 
-from micropython import const
-from ir_tx import IR
+import micropython
+import infrared.transmission
 
 
-class SONY_ABC(IR):
-
+class TransmissionSony(infrared.transmission.Transmission):
     def __init__(self, pin, bits, freq, verbose):
         super().__init__(pin, freq, 3 + bits * 2, 30, verbose)
         if bits not in (12, 15, 20):
@@ -33,21 +32,21 @@ class SONY_ABC(IR):
 
 
 # Sony specifies 40KHz
-class SONY_12(SONY_ABC):
+class TransmissionSony12(TransmissionSony):
     valid = (0x1f, 0x7f, 0)  # Max addr, data, toggle
 
     def __init__(self, pin, freq=40000, verbose=False):
         super().__init__(pin, 12, freq, verbose)
 
 
-class SONY_15(SONY_ABC):
+class TransmissionSony15(TransmissionSony):
     valid = (0xff, 0x7f, 0)  # Max addr, data, toggle
 
     def __init__(self, pin, freq=40000, verbose=False):
         super().__init__(pin, 15, freq, verbose)
 
 
-class SONY_20(SONY_ABC):
+class TransmissionSony20(TransmissionSony):
     valid = (0x1f, 0x7f, 0xff)  # Max addr, data, toggle
 
     def __init__(self, pin, freq=40000, verbose=False):
