@@ -6,6 +6,7 @@
 
 # WARNING: This is experimental and subject to change.
 import machine
+import utime
 
 import infrared.received
 
@@ -30,8 +31,8 @@ class ReceivedRemoteMCE(infrared.received.Received):
             return cs == csum
 
         try:
-            t0 = ticks_diff(self._times[1], self._times[0])  # 2000μs mark
-            t1 = ticks_diff(self._times[2], self._times[1])  # 1000μs space
+            t0 = utime.ticks_diff(self._times[1], self._times[0])  # 2000μs mark
+            t1 = utime.ticks_diff(self._times[2], self._times[1])  # 1000μs space
             if not ((1800 < t0 < 2200) and (800 < t1 < 1200)):
                 raise RuntimeError(self.BADSTART)
             nedges = self.edge  # No. of edges detected
@@ -47,7 +48,7 @@ class ReceivedRemoteMCE(infrared.received.Received):
                 if x > nedges - 2:
                     raise RuntimeError(self.BADBLOCK)
                 # width is 500/1000 nominal
-                width = ticks_diff(self._times[x + 1], self._times[x])
+                width = utime.ticks_diff(self._times[x + 1], self._times[x])
                 if not 250 < width < 1350:
                     self.verbose and print('Bad block 3 Width', width, 'x', x)
                     raise RuntimeError(self.BADBLOCK)
